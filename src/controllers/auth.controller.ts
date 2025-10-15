@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
 import { AuthService } from "../services/auth.service";
-import { AuthDto } from "../dtos/auth.dto";
+import {AuthDto, AuthDtoType} from "../dtos/auth.dto";
 
 export class AuthController {
-    static getToken(req: Request, res: Response) {
+    static getToken(req: Request<{}, {}, AuthDtoType>, res: Response) {
         try {
 
             const { email } = AuthDto.parse(req.body);
