@@ -1,14 +1,15 @@
 import { Options } from 'swagger-jsdoc';
 import {env} from "./env";
+import path from "node:path";
 
 
 const swaggerOptions: Options = {
     definition: {
         openapi: '3.0.0',
         info: {
-            title: 'My Node.js API with TypeScript',
+            title: 'Text Justifier API',
             version: '1.0.0',
-            description: 'A sample API documented with Swagger',
+            description: 'API REST pour justifier du texte',
         },
         servers: [
             {
@@ -17,7 +18,7 @@ const swaggerOptions: Options = {
             },
         ],
     },
-    apis: ['./src/routes/*.ts'], // Paths to files containing JSDoc comments
+    apis: ['../src/routes/*.ts'], // Path to the API docs
 };
 
 export default swaggerOptions;
