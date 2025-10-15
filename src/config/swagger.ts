@@ -18,7 +18,7 @@ const swaggerOptions: Options = {
             },
         ],
     },
-    apis: ['../src/routes/*.ts'], // Path to the API docs
+    apis: [path.join(__dirname, '../../src/routes/*.ts')] ,// Path to the API docs
 };
 
 export default swaggerOptions;
