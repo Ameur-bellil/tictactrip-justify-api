@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { JustifyController } from "../controllers/justify.controller";
 import { authenticate } from "../middlewares/auth.middleware";
+import { rateLimit } from "../middlewares/ratelimit.middleware";
 
 const justifyRouter = Router();
 
@@ -52,7 +53,20 @@ const justifyRouter = Router();
  *                 error:
  *                   type: string
  *                   example: "Missing token"
+ *       402:
+ *         description: Limite quotidienne de mots dépassée
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Paiement requis : limite quotidienne de mots (80 000) dépassée"
+ *                 limit:
+ *                   type: integer
+ *                   example: 80000
  */
-justifyRouter.post("/justify", authenticate, JustifyController.justify);
+justifyRouter.post("/justify", authenticate, rateLimit, JustifyController.justify);
 
 export default justifyRouter;
