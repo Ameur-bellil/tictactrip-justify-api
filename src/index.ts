@@ -4,6 +4,7 @@ import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 import {env} from "./config/env";
 import authRouter from "./routes/auth.route";
+import justifyRouter from "./routes/justify.route";
 
 const app = express();
 app.use(express.text());
@@ -13,8 +14,15 @@ const specs = swaggerJsdoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 
 app.use('/api', authRouter);
+app.use('/api', justifyRouter);
 
-app.listen(env.PORT, () => {
-    console.log(`[server]: Server is running at ${env.BASE_URL}:${env.PORT}`);
-    console.log(`[server]: Swagger docs available at ${env.BASE_URL}:${env.PORT}/api-docs`);
-});
+// Export pour Supertest
+export default app;
+
+// Lancement du serveur seulement si index.ts est exécuté directement
+if (require.main === module) {
+    app.listen(env.PORT, () => {
+        console.log(`[server]: Server is running at ${env.BASE_URL}:${env.PORT}`);
+        console.log(`[server]: Swagger docs available at ${env.BASE_URL}:${env.PORT}/api-docs`);
+    });
+}
