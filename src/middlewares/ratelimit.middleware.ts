@@ -1,44 +1,31 @@
-import { Request, Response, NextFunction } from "express";
+import { NextFunction, Request, Response } from 'express';
+import { StatusCodes } from 'http-status-codes';
+import {AuthService} from "../services/auth.service";
+import {CustomError} from "../utils/custom.error";
 
-// Limite de 80 000 mots par jour
-const WORD_LIMIT_PER_DAY = 80000;
 
-// Structure : Map<email, { count: number; date: string }>
-const usageMap = new Map<string, { count: number; date: string }>();
+const MAX_WORDS_PER_DAY = 80000;
 
-export function rateLimit(req: Request, res: Response, next: NextFunction) {
-    const user = (req as any).user; // ajouté par authenticate middleware
-    if (!user || !user.email) {
-        return res.status(401).json({ error: "Unauthorized: missing user" });
-    }
-
-    const email = user.email;
+const authService = new AuthService();
+export const rateLimitMiddleware = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) => {
     const text = req.body;
+    const user = res.locals.user;
 
-    if (!text || typeof text !== "string") {
-        return res.status(400).json({ error: "Invalid text format" });
+    if (!text) {
+        throw new CustomError('Text is required', StatusCodes.BAD_REQUEST);
     }
 
+    const userDetails = await authService.getUserDetails(user.email);
+    const wordCount = text.split(/\s+/).length;
 
-    const wordCount = text.trim().split(/\s+/).length;
-
-    const today = new Date().toISOString().slice(0, 10); // ex: "2025-10-15"
-    const usage = usageMap.get(email);
-
-    // Si premier usage ou nouveau jour → reset compteur
-    if (!usage || usage.date !== today) {
-        usageMap.set(email, { count: wordCount, date: today });
-        return next();
+    if (userDetails && userDetails.totalWords + wordCount > MAX_WORDS_PER_DAY) {
+        next(new CustomError('You have exceeded the daily word limit, payment required', StatusCodes.PAYMENT_REQUIRED));
+    } else {
+        await authService.updateWordCount(user.email, wordCount);
+        next();
     }
-
-    // Vérifie la limite
-    const newTotal = usage.count + wordCount;
-    if (newTotal > WORD_LIMIT_PER_DAY) {
-        return res.status(402).json({error: "Payment Required",limit : WORD_LIMIT_PER_DAY});
-    }
-
-    // Met à jour le compteur
-    usageMap.set(email, { count: newTotal, date: today });
-
-    next();
-}
+};
