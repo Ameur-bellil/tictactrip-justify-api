@@ -26,7 +26,7 @@ export class JustifyService {
 
         const cachedResult = await this.redisClient.get(cacheKey);
         if (cachedResult) {
-            console.log("[App] Cache hit");
+            console.log("[App] Retrieved justified text from cache");
             return cachedResult;
         }
 

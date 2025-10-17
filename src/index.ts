@@ -6,6 +6,7 @@ import swaggerUi from 'swagger-ui-express';
 import authRouter from "./routes/auth.route";
 import justifyRouter from "./routes/justify.route";
 import {connectMongo} from "./config/mongo";
+import './config/redis';
 
 const app = express();
 app.use(express.text());
@@ -22,6 +23,7 @@ async function startServer() {
         await connectMongo();
         const server = app.listen(env.PORT, () => {
             console.log(`[server]: Server running at ${env.BASE_URL}:${env.PORT}`);
+            console.log(`[server]: Swagger docs available at ${env.BASE_URL}:${env.PORT}/api-docs/`);
         });
     } catch (err) {
         console.error("Failed to start server:", err);
@@ -32,3 +34,5 @@ async function startServer() {
 if (require.main === module) {
     startServer();
 }
+
+export default app;

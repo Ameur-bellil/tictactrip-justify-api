@@ -23,7 +23,7 @@ export const rateLimitMiddleware = async (
     const wordCount = text.split(/\s+/).length;
 
     if (userDetails && userDetails.totalWords + wordCount > MAX_WORDS_PER_DAY) {
-        next(new CustomError('You have exceeded the daily word limit, payment required', StatusCodes.PAYMENT_REQUIRED));
+        next(new CustomError('Payment required', StatusCodes.PAYMENT_REQUIRED));
     } else {
         await authService.updateWordCount(user.email, wordCount);
         next();
