@@ -9,7 +9,7 @@ import {connectMongo} from "./config/mongo";
 import './config/redis';
 
 const app = express();
-app.use(express.text());
+app.use(express.text({ limit: "50mb" }));  // limit 50MB
 app.use(express.json());
 
 const specs = swaggerJsdoc(swaggerOptions);
