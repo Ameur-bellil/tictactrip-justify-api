@@ -37,6 +37,14 @@ const authRouter = Router();
  *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
  *       400:
  *         description: Email invalide ou manquant
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: No Email provided or invalid format
  */
 authRouter.post("/token", AuthController);
 export default authRouter;
