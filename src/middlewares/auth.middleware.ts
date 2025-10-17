@@ -6,22 +6,38 @@ import {env} from "../config/env";
 
 function verifyToken(token: string): JwtPayload | string {
     try {
-        return jwt.verify(token, env.JWT_SECRET)
+        return jwt.verify(token, env.JWT_SECRET);
     } catch (error) {
-        throw new CustomError('invalid or expired token', StatusCodes.UNAUTHORIZED);
+        throw new CustomError("Invalid or expired token", StatusCodes.UNAUTHORIZED);
     }
 }
 
-export const authenticateMiddleware = async (req: Request, res: Response, next: NextFunction) => {
-    const authHeader = req.headers.authorization;
+export const authenticateMiddleware = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const authHeader = req.headers.authorization;
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-        throw new CustomError("Authorization header missing or malformed", StatusCodes.UNAUTHORIZED);
+        if (!authHeader || !authHeader.startsWith("Bearer ")) {
+            return res
+                .status(StatusCodes.UNAUTHORIZED)
+                .json({ error: "Missing token" });
+        }
+
+        const token = authHeader.split(" ")[1];
+        res.locals.user = verifyToken(token);
+        next();
+    } catch (err) {
+        if (err instanceof CustomError) {
+            return res.status(err.statusCode).json({ error: err.message });
+        }
+        console.error(err);
+        res
+            .status(StatusCodes.INTERNAL_SERVER_ERROR)
+            .json({ error: "Internal server error" });
     }
-    const token = authHeader.split(" ")[1];
-    const decoded = verifyToken(token);
-    res.locals.user = decoded;
-    next();
 };
 
 
