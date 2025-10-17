@@ -1,29 +1,31 @@
-import { NextFunction, Request, Response } from 'express';
-import { StatusCodes } from 'http-status-codes';
+import {NextFunction, Request, Response} from "express";
+import {StatusCodes} from "http-status-codes";
 import {AuthService} from "../services/auth.service";
-import {CustomError} from "../utils/custom.error";
-
 
 const MAX_WORDS_PER_DAY = 80000;
-
 const authService = new AuthService();
+
 export const rateLimitMiddleware = async (
     req: Request,
     res: Response,
-    next: NextFunction,
+    next: NextFunction
 ) => {
     const text = req.body;
     const user = res.locals.user;
 
-    if (!text) {
-        throw new CustomError('Text is required', StatusCodes.BAD_REQUEST);
+    if (!text || typeof text !== "string" || text.trim() === "") {
+        return res
+            .status(StatusCodes.BAD_REQUEST)
+            .json({ error: "No text provided or invalid format" });
     }
 
     const userDetails = await authService.getUserDetails(user.email);
     const wordCount = text.split(/\s+/).length;
 
     if (userDetails && userDetails.totalWords + wordCount > MAX_WORDS_PER_DAY) {
-        next(new CustomError('Payment required', StatusCodes.PAYMENT_REQUIRED));
+       return res
+            .status(StatusCodes.PAYMENT_REQUIRED)
+            .json({ error: "Payment required" });
     } else {
         await authService.updateWordCount(user.email, wordCount);
         next();
