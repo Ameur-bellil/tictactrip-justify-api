@@ -15,7 +15,7 @@ export const AuthController = async (
     if (!parseResult.success) {
         return res
             .status(StatusCodes.BAD_REQUEST)
-            .json({error: "Invalid email format"});
+            .json({error: "No Email provided or invalid format"});
     }
 
     const {email} = parseResult.data;
