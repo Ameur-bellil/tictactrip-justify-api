@@ -2,8 +2,8 @@ import Redis from "ioredis";
 import {env} from "./env";
 
 export const redisClient = new Redis({
-    host: env.REDIS_HOST || "localhost",
-    port: Number(env.REDIS_PORT) || 6379,
+    host: env.REDIS_HOST,
+    port: Number(env.REDIS_PORT),
 });
 
 redisClient.on('connect', () => {
