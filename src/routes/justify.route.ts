@@ -62,10 +62,7 @@ const justifyRouter = Router();
  *               properties:
  *                 error:
  *                   type: string
- *                   example: "Paiement requis : limite quotidienne de mots (80 000) dépassée"
- *                 limit:
- *                   type: integer
- *                   example: 80000
+ *                   example: "Payment required"
  */
 justifyRouter.post("/justify", authenticateMiddleware, rateLimitMiddleware, JustifyController.justify);
 
