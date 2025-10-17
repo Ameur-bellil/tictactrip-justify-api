@@ -16,6 +16,10 @@ const swaggerOptions: Options = {
                 url: `${env.BASE_URL}:${env.PORT}`,
                 description: 'Development server',
             },
+            {
+                url: 'http://api-justify-tictac.francecentral.cloudapp.azure.com:8080', // Azure VM / prod
+                description: 'Production server (Azure)',
+            },
         ],
     },
     apis: [path.join(__dirname, '../../src/routes/*.ts')] ,// Path to the API docs
