@@ -1,17 +1,25 @@
-import { Request, Response } from "express";
-import { AuthService } from "../services/auth.service";
+import {Request, Response} from "express";
+import {StatusCodes} from "http-status-codes";
 import {AuthDto, AuthDtoType} from "../dtos/auth.dto";
+import {AuthService} from "../services/auth.service";
 
-export class AuthController {
-    static getToken(req: Request<{}, {}, AuthDtoType>, res: Response) {
-        try {
+const authService = new AuthService();
 
-            const { email } = AuthDto.parse(req.body);
-            const token = AuthService.generateToken(email);
-            res.json({ token });
+export const AuthController = async (
+    req: Request<object, object, AuthDtoType>,
+    res: Response
+) => {
+    // Validation du body avec Zod
+    const parseResult = AuthDto.safeParse(req.body);
 
-        } catch (err: any) {
-            res.status(400).json({ error: err.message });
-        }
+    if (!parseResult.success) {
+        return res
+            .status(StatusCodes.BAD_REQUEST)
+            .json({error: "Invalid email format"});
     }
-}
+
+    const {email} = parseResult.data;
+    const token = await authService.generateToken(email);
+    res.status(StatusCodes.OK).json({token});
+
+};

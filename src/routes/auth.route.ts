@@ -38,5 +38,5 @@ const authRouter = Router();
  *       400:
  *         description: Email invalide ou manquant
  */
-authRouter.post("/token", AuthController.getToken);
+authRouter.post("/token", AuthController);
 export default authRouter;
