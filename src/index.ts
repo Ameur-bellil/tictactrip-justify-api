@@ -1,10 +1,11 @@
+import {env} from "./config/env";
 import express from 'express';
 import swaggerOptions from './config/swagger';
 import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
-import {env} from "./config/env";
 import authRouter from "./routes/auth.route";
 import justifyRouter from "./routes/justify.route";
+import {connectMongo} from "./config/mongo";
 
 const app = express();
 app.use(express.text());
@@ -16,13 +17,18 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 app.use('/api', authRouter);
 app.use('/api', justifyRouter);
 
-// Export pour Supertest
-export default app;
+async function startServer() {
+    try {
+        await connectMongo();
+        const server = app.listen(env.PORT, () => {
+            console.log(`[server]: Server running at ${env.BASE_URL}:${env.PORT}`);
+        });
+    } catch (err) {
+        console.error("Failed to start server:", err);
+        process.exit(1);
+    }
+}
 
-// Lancement du serveur seulement si index.ts est exécuté directement
 if (require.main === module) {
-    app.listen(env.PORT, () => {
-        console.log(`[server]: Server is running at ${env.BASE_URL}:${env.PORT}`);
-        console.log(`[server]: Swagger docs available at ${env.BASE_URL}:${env.PORT}/api-docs`);
-    });
+    startServer();
 }
