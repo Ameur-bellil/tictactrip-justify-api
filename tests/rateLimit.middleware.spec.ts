@@ -1,45 +1,72 @@
 import { Request, Response, NextFunction } from "express";
-import { rateLimit } from "../src/middlewares/ratelimit.middleware";
+import { rateLimitMiddleware } from "../src/middlewares/ratelimit.middleware";
+import { AuthService } from "../src/services/auth.service";
+import { StatusCodes } from "http-status-codes";
+import { CustomError } from "../src/utils/custom.error";
 
-describe("RateLimit Middleware", () => {
-    let req: any; // cast any pour bypasser TS
+jest.mock("../src/services/auth.service");
+
+const mockedAuthService = AuthService as jest.MockedClass<typeof AuthService>;
+
+describe("rateLimitMiddleware", () => {
+    let req: Partial<Request>;
     let res: Partial<Response>;
     let next: NextFunction;
 
     beforeEach(() => {
-        // Reset le compteur interne (Map) avant chaque test
-        (rateLimit as any).usageMap = new Map();
-
-        req = { user: { email: "test@example.com" } };
-        res = {
-            status: jest.fn().mockReturnThis(),
-            json: jest.fn(),
-        };
+        req = {};
+        res = { locals: { user: { email: "test@example.com" } } };
         next = jest.fn();
     });
 
-    it("should call next if under limit", () => {
-        req.body = "word ".repeat(1000); // 1000 mots
-        rateLimit(req, res as any, next);
-        expect(next).toHaveBeenCalled();
-    });
+    it("should return 400 if text is missing", async () => {
+        req.body = "";
+        res.status = jest.fn().mockReturnValue(res);
+        res.json = jest.fn();
 
-    it("should return 402 if limit exceeded", () => {
-        req.body = "word ".repeat(81000); // dépassement 80k mots
-        rateLimit(req, res as any, next);
-        expect(res.status).toHaveBeenCalledWith(402);
-        expect(res.json).toHaveBeenCalledWith({error: "Payment Required",});
+        await rateLimitMiddleware(req as Request, res as Response, next);
+
+        expect(res.status).toHaveBeenCalledWith(StatusCodes.BAD_REQUEST);
+        expect(res.json).toHaveBeenCalledWith({
+            error: "No text provided or invalid format",
+        });
         expect(next).not.toHaveBeenCalled();
     });
 
+    it("should call next if user is under the word limit", async () => {
+        req.body = "Un texte valide";
 
-    it("should accumulate words per user", () => {
-        req.body = "word ".repeat(50000);
-        rateLimit(req, res as any, next); // 50k
-        req.body = "word ".repeat(30000);
-        rateLimit(req, res as any, next); // 30k
-        req.body = "word ".repeat(1000);
-        rateLimit(req, res as any, next); // dépasse 80k
-        expect(res.status).toHaveBeenCalledWith(402);
+        // Mock complet pour IUser avec Partial<IUser>
+        mockedAuthService.prototype.getUserDetails.mockResolvedValue({
+            email: "test@example.com",
+            totalWords: 1000,
+            lastReset: new Date(),
+        } as Partial<any> as any);
+
+        // Mock updateWordCount
+        mockedAuthService.prototype.updateWordCount.mockResolvedValue(undefined as any);
+
+        // Appel du middleware
+        await rateLimitMiddleware(req as Request, res as Response, next);
+
+        // Vérifie que next() a été appelé
+        expect(next).toHaveBeenCalled();
+    });
+
+
+    it("should call next with CustomError if word limit exceeded", async () => {
+        req.body = "Un mot";
+
+        mockedAuthService.prototype.getUserDetails.mockResolvedValue({
+            email: "test@example.com",
+            totalWords: 80000, // limite quotidienne atteinte
+            lastReset: new Date(),
+        } as Partial<any> as any);
+
+        await rateLimitMiddleware(req as Request, res as Response, (err?: any) => {
+            expect(err).toBeInstanceOf(CustomError);
+            expect(err.message).toBe("Payment required");
+            expect(err.statusCode).toBe(StatusCodes.PAYMENT_REQUIRED);
+        });
     });
 });
