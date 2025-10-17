@@ -1,7 +1,7 @@
-import { Router } from "express";
-import { JustifyController } from "../controllers/justify.controller";
-import { authenticate } from "../middlewares/auth.middleware";
-import { rateLimit } from "../middlewares/ratelimit.middleware";
+import {Router} from "express";
+import {JustifyController} from "../controllers/justify.controller";
+import {authenticateMiddleware} from "../middlewares/auth.middleware";
+import {rateLimitMiddleware} from "../middlewares/ratelimit.middleware";
 
 const justifyRouter = Router();
 
@@ -67,6 +67,6 @@ const justifyRouter = Router();
  *                   type: integer
  *                   example: 80000
  */
-justifyRouter.post("/justify", authenticate, rateLimit, JustifyController.justify);
+justifyRouter.post("/justify", authenticateMiddleware, rateLimitMiddleware, JustifyController.justify);
 
 export default justifyRouter;
