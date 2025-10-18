@@ -1,4 +1,3 @@
-// tests/justify.integration.spec.ts
 import request from "supertest";
 import app from "../src/index"; // Utilise l'app réelle
 

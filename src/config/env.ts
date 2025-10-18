@@ -5,7 +5,6 @@ export const env = {
     REDIS_HOST: process.env.REDIS_HOST,
     REDIS_PORT: parseInt(process.env.REDIS_PORT!),
     JWT_SECRET: process.env.JWT_SECRET!,
-    WORD_LIMIT: parseInt(process.env.WORD_LIMIT!)
 };
 
 
