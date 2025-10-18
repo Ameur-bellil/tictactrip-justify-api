@@ -205,6 +205,7 @@ douceur prochaine du retour.',
 ## Déploiement en Production
 
 L'API est déployée sur Azure Cloud et accessible publiquement à l'adresse suivante :
+
 🔗 URL de l'API : http://api-justify-tictac.francecentral.cloudapp.azure.com:8080
 
 ### Accès à la Documentation en Production
