@@ -214,9 +214,5 @@ Visitez la documentation Swagger interactive en production :
 
 http://api-justify-tictac.francecentral.cloudapp.azure.com:8080/api-docs/
 
-## 👤 Auteur
 
-**Ameur Bellil**
-
-- GitHub: [@Ameur-bellil](https://github.com/Ameur-bellil)
 
