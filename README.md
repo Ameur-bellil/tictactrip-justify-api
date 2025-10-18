@@ -58,7 +58,7 @@ yarn install
 Créez un fichier `.env` à la racine du projet avec les variables suivantes :
 
 ```env
-PORT=3000
+PORT=8080
 MONGODB_URI=mongodb://localhost:27017/justify-api
 REDIS_HOST=localhost
 REDIS_PORT=6379
